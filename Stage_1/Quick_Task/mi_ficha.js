@@ -16,11 +16,11 @@ console.log("La edad es tipo ", typeof age);
 console.log("El tipo de estudio de APIS es ", typeof apisStudy);
 console.log("El tipo de hobbie es", typeof hobbies);
 
-// Solicitud de informacion al user y adicionar la nueva info al array
-let newHobbie = prompt("¿Cual es su nuevo hobbie?");
+// Se agrega nueva informacion al grupo de hobbies del user
+let newHobbie = "bailar"
 hobbies.push(newHobbie);
 console.log("Sus hobbies se han actualizado ", hobbies, " y ahora tienen en total ", hobbies.length);
 
 // el user cumplio años, se actualizara su edad
 age++;
-console.log("Su nueva edad es ", age);
+console.log("Al cumplir años su nueva edad es ", age);

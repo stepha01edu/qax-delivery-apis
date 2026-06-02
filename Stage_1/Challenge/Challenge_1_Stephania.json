@@ -1,0 +1,232 @@
+{
+	"info": {
+		"_postman_id": "b47ab2cb-679e-47ff-9592-953df4d71b73",
+		"name": "Training-Stage 1",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "55355051",
+		"_collection_link": "https://stephaniasoe-edu-3834636.postman.co/workspace/Stephania's-Workspace~e004002b-ec1f-46a1-8e92-066bb7111af8/collection/55355051-b47ab2cb-679e-47ff-9592-953df4d71b73?action=share&source=collection_link&creator=55355051"
+	},
+	"item": [
+		{
+			"name": "Healt-check",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "{{QA}}/health-check"
+			},
+			"response": []
+		},
+		{
+			"name": "Register-user",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"STEPHA\",\n  \"email\": \"stephaniasoe.edu+1@gmail.com\",\n  \"password\": \"QWERTY123\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "{{QA}}/users/register"
+			},
+			"response": []
+		},
+		{
+			"name": "Login-user",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const response = pm.response.json();",
+							"pm.environment.set(\"token\", response.data.token);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"stephaniasoe.edu+1@gmail.com\",\n  \"password\": \"Qwerty12345\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "{{QA}}/users/login"
+			},
+			"response": []
+		},
+		{
+			"name": "Profile-user",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-auth-token",
+						"value": "{{token}}"
+					}
+				],
+				"url": {
+					"raw": "{{QA}}/users/profile",
+					"host": [
+						"{{QA}}"
+					],
+					"path": [
+						"users",
+						"profile"
+					],
+					"query": [
+						{
+							"key": "email",
+							"value": "STEPHA2@TEST.COM",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Change-password",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "x-auth-token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"currentPassword\": \"Qwerty12345\",\n  \"newPassword\": \"QWERTY1234\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "{{QA}}/users/change-password"
+			},
+			"response": []
+		},
+		{
+			"name": "Forgot-password",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"stephaniasoe.edu+1@gmail.com\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "{{QA}}/users/forgot-password"
+			},
+			"response": []
+		},
+		{
+			"name": "Verify-reset-password-token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"token\": \"9ad7bc91bc9b4ad9ae065c689145c05bb37a9414901d49b7b8506fac5b404ce4\" \n  //token obtenido desde la url recibida en el mail\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "{{QA}}/users/verify-reset-password-token"
+			},
+			"response": []
+		},
+		{
+			"name": "Reset-password",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"token\": \"9ad7bc91bc9b4ad9ae065c689145c05bb37a9414901d49b7b8506fac5b404ce4\", \n  //token obtenido desde la url recibida en el mail\n  \"newPassword\": \"Qwerty12346\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "{{QA}}/users/reset-password"
+			},
+			"response": []
+		}
+	]
+}

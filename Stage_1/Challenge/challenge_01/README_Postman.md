@@ -1,10 +1,13 @@
-# Entrega: Pruebas de API - Gestión de Cuenta de Usuario
+# Entrega: Pruebas Manuales de API - Gestión de Cuenta de Usuario
 
-## Objetivo / Historia de usuario
 
-El objetivo de esta entrega es validar mediante Postman y automatización con JavaScript + Playwright los servicios relacionados con la gestión de cuenta de un usuario registrado, incluyendo inicio de sesión, consulta de perfil, cambio de contraseña y recuperación de cuenta.
+## Objetivo
 
-**Historia de usuario:**
+El objetivo de esta entrega es validar manualmente mediante Postman los servicios relacionados con la gestión de cuenta de un usuario registrado, incluyendo inicio de sesión, consulta de perfil, cambio de contraseña y recuperación de cuenta.
+
+---
+
+## Historia de usuario
 
 Como usuario registrado de la aplicación, quiero poder consultar mi perfil, cambiar mi contraseña y recuperar mi cuenta si olvido mi clave, para mantener el acceso a mis notas y gestionar mi cuenta de forma segura.
 
@@ -26,15 +29,11 @@ Como usuario registrado de la aplicación, quiero poder consultar mi perfil, cam
 
 ---
 
-## Estrategia de prueba
+## Alcance de las pruebas manuales
 
-Las pruebas se ejecutaron inicialmente en Postman, validando los endpoints de la API relacionados con autenticación y gestión de cuenta.
+Las pruebas manuales se ejecutan en Postman sobre los endpoints de la API relacionados con autenticación y gestión de cuenta.
 
-Adicionalmente, se creó un archivo JavaScript para automatizar parte del flujo usando Playwright, con el objetivo de validar los principales endpoints desde código.
-
-Se probaron flujos positivos y negativos para verificar el comportamiento esperado de la API en diferentes escenarios.
-
-Las funcionalidades cubiertas fueron:
+Las funcionalidades cubiertas son:
 
 1. Inicio de sesión.
 2. Consulta de perfil.
@@ -45,40 +44,46 @@ Las funcionalidades cubiertas fueron:
 
 ---
 
+## Estrategia de prueba manual
+
+La estrategia consiste en ejecutar casos positivos y negativos desde Postman, validando las respuestas de la API de acuerdo con los criterios de aceptación definidos para la historia de usuario.
+
+Durante la ejecución se validan:
+
+* Código de respuesta HTTP.
+* Mensaje de respuesta.
+* Estructura del body.
+* Datos retornados por la API.
+* Manejo de errores.
+* Restricciones de acceso a endpoints protegidos.
+* Comportamiento esperado en escenarios positivos y negativos.
+
+---
+
 ## Precondiciones generales
 
 * La API debe estar disponible.
 * El usuario debe estar registrado en la aplicación.
+* Se debe contar con credenciales válidas del usuario de prueba.
 * Para los endpoints protegidos, se debe contar con un token válido.
 * El token de autenticación se obtiene al ejecutar el endpoint de login.
 * En Postman se debe configurar una variable de entorno para reutilizar el token en las demás peticiones.
-* En la automatización con JavaScript, el token de login se guarda en una variable para usarlo en los endpoints protegidos.
 * Para el flujo de recuperación de contraseña, el token de recuperación llega al correo del usuario y no es expuesto directamente por la API.
 
 ---
 
-## Automatización con JavaScript y Playwright
+## Variables sugeridas en Postman
 
-Se creó un archivo JavaScript para automatizar los endpoints principales de la historia de usuario usando Playwright.
+Se recomienda configurar un ambiente en Postman con las siguientes variables:
 
-Los endpoints automatizados fueron:
-
-* Iniciar sesión.
-* Consultar el perfil del usuario.
-* Cambiar la contraseña del usuario.
-* Solicitar la recuperación de contraseña.
-* Validar el token de recuperación de contraseña.
-* Restablecer la contraseña del usuario.
-
-### Consideración sobre la recuperación de contraseña
-
-Los endpoints relacionados con la recuperación de contraseña fueron **parcialmente automatizados**.
-
-Esto se debe a que, al solicitar la recuperación de contraseña, la API envía el token de recuperación al correo del usuario. Este token no es expuesto en la respuesta de la API por motivos de seguridad.
-
-Por esta razón, para continuar con el flujo automatizado, fue necesario tomar el token recibido en el correo y dejarlo **hardcodeado temporalmente** en el archivo JavaScript.
-
-Esta solución permite validar el flujo de recuperación y restablecimiento de contraseña, aunque no representa una automatización completa de extremo a extremo.
+| Variable | Descripción |
+| --- | --- |
+| `base_url` | URL base de la API |
+| `auth_token` | Token de autenticación obtenido en el login |
+| `user_email` | Correo del usuario registrado |
+| `current_password` | Contraseña actual del usuario |
+| `new_password` | Nueva contraseña a configurar |
+| `recovery_token` | Token de recuperación recibido por correo |
 
 ---
 
@@ -96,13 +101,11 @@ Feature: Autenticación y consulta de perfil por API
   Background:
     Given que el usuario está registrado en la aplicación
 
-  @Automatizado
   Scenario: CP01 - Iniciar sesión correctamente
     When envía una petición POST al endpoint de login con credenciales válidas
     Then la API debe responder con status code 200
     And debe retornar un token de autenticación válido
 
-  @Automatizado
   Scenario: CP02 - Consultar perfil correctamente
     Given que el usuario obtuvo un token de autenticación válido
     When envía una petición GET al endpoint de perfil
@@ -131,7 +134,6 @@ Feature: Cambio de contraseña por API
     Given que el usuario está registrado en la aplicación
     And cuenta con un token de autenticación válido
 
-  @Automatizado
   Scenario: CP04 - Cambiar contraseña correctamente
     Given que el usuario conoce su contraseña actual
     When envía una petición al endpoint de cambio de contraseña
@@ -146,7 +148,6 @@ Feature: Cambio de contraseña por API
     Then la API debe responder con status code 400 o 401
     And la contraseña no debe actualizarse
 
-  @Automatizado
   Scenario: CP06 - Iniciar sesión con la nueva contraseña
     Given que el usuario cambió su contraseña correctamente
     When envía una petición POST al endpoint de login usando la nueva contraseña
@@ -168,7 +169,6 @@ Feature: Recuperación de cuenta por API
   Background:
     Given que el usuario está registrado en la aplicación
 
-  @Automatizado
   Scenario: CP07 - Solicitar recuperación con correo registrado
     When envía una petición al endpoint de recuperación de cuenta
     And envía un correo registrado
@@ -181,7 +181,6 @@ Feature: Recuperación de cuenta por API
     Then la API debe responder con status code 400 o 404
     And no deben enviarse instrucciones de recuperación
 
-  @ParcialmenteAutomatizado
   Scenario: CP09 - Validar token de recuperación
     Given que el usuario recibió un token de recuperación en su correo
     When envía una petición al endpoint de validación de token
@@ -189,7 +188,6 @@ Feature: Recuperación de cuenta por API
     Then la API debe responder con status code 200
     And debe confirmar que el token es válido
 
-  @ParcialmenteAutomatizado
   Scenario: CP10 - Restablecer contraseña con token válido
     Given que el usuario recibió un token de recuperación válido
     When envía una petición al endpoint de restablecimiento de contraseña
@@ -206,13 +204,11 @@ Feature: Recuperación de cuenta por API
 
 ---
 
-## Ejecución
+## Ejecución en Postman
 
-Las pruebas fueron ejecutadas manualmente en **Postman**, enviando peticiones HTTP a los endpoints correspondientes de la API.
+Las pruebas se ejecutan manualmente en Postman utilizando la colección exportada en formato JSON.
 
-Para la ejecución manual se usó el archivo JSON de la colección de Postman, el cual contiene los endpoints organizados y listos para ser ejecutados.
-
-### Ejecución en Postman
+### Pasos de ejecución
 
 1. Abrir Postman.
 2. Importar el archivo JSON de la colección.
@@ -229,51 +225,23 @@ Para la ejecución manual se usó el archivo JSON de la colección de Postman, e
    * Datos retornados por la API.
 9. Guardar evidencias de los resultados obtenidos.
 
-### Ejecución de pruebas automatizadas con Playwright
-
-También se ejecutaron pruebas automatizadas desde el archivo JavaScript creado con **Playwright**.
-
-Para ejecutar el archivo de automatización, se utiliza el siguiente comando:
-
-```bash
-npx playwright test tests/auth.spec.js
-```
-
 ---
 
-## Resultados
+## Resultados esperados
 
-Los resultados de las pruebas se validaron en Postman revisando:
+Los resultados esperados de las pruebas manuales son:
 
-* Código de respuesta HTTP.
-* Body de respuesta.
-* Mensajes retornados por la API.
-* Uso correcto del token.
-* Comportamiento esperado en escenarios positivos y negativos.
-
-En la automatización con Playwright, los resultados se validaron mediante:
-
-* Status code esperado.
-* Mensajes de respuesta esperados.
-* Obtención y reutilización del token de autenticación.
-* Ejecución de endpoints protegidos.
-* Logs en consola para confirmar datos importantes del flujo.
-
-### Resultado de automatización
-
-| Flujo                                   | Estado                    |
-| --------------------------------------- | ------------------------- |
-| Inicio de sesión                        | Automatizado              |
-| Consulta de perfil                      | Automatizado              |
-| Cambio de contraseña                    | Automatizado              |
-| Login con nueva contraseña              | Automatizado              |
-| Solicitud de recuperación de contraseña | Automatizado              |
-| Validación de token de recuperación     | Parcialmente automatizado |
-| Restablecimiento de contraseña          | Parcialmente automatizado |
-
-### Observación
-
-La recuperación de contraseña no quedó completamente automatizada porque el token de recuperación no es retornado por la API. El token llega al correo del usuario y fue necesario ingresarlo de forma manual en el código para continuar con el flujo.
+* El login debe retornar un token válido cuando las credenciales sean correctas.
+* La consulta de perfil debe retornar la información del usuario cuando se envíe un token válido.
+* La consulta de perfil debe ser rechazada cuando no se envíe token o cuando el token sea inválido.
+* El cambio de contraseña debe ejecutarse correctamente cuando la contraseña actual sea válida.
+* El cambio de contraseña debe ser rechazado cuando la contraseña actual sea incorrecta o la nueva contraseña no cumpla las reglas de seguridad.
+* El usuario debe poder iniciar sesión con la nueva contraseña después del cambio.
+* La recuperación de cuenta debe procesarse correctamente cuando el correo esté registrado.
+* La recuperación de cuenta debe rechazarse cuando el correo no exista o tenga un formato inválido.
+* La validación de token de recuperación debe ser exitosa cuando el token sea válido.
+* El restablecimiento de contraseña debe completarse cuando el token de recuperación sea válido.
+* El restablecimiento de contraseña debe rechazarse cuando el token sea inválido o esté expirado.
 
 ---
 
@@ -283,23 +251,18 @@ Las evidencias pueden incluir:
 
 * Capturas de ejecución en Postman.
   Captura del login exitoso.
-  ![alt text](image-10.png)
+  ![alt text](Evidences/image-10.png)
   Captura de consulta de perfil exitosa. 
-  ![alt text](image-11.png)
+  ![alt text](Evidences/image-11.png)
   Captura de consulta sin token. 
-  ![alt text](image-12.png)
+  ![alt text](Evidences/image-12.png)
   Captura de cambio de contraseña exitoso. 
-  ![alt text](image-13.png)
+  ![alt text](Evidences/image-13.png)
   Captura de Recuperacion de contraseña exitoso.
-  ![alt text](image-14.png)
-  ![alt text](image-15.png)
+  ![alt text](Evidences/image-14.png)
+  ![alt text](Evidences/image-15.png)
   Captura de intento con contraseña incorrecta. 
-  ![alt text](image-16.png)
+  ![alt text](Evidences/image-16.png)
   Captura de recuperación de cuenta. 
-  ![alt text](image-17.png)
-* Captura de ejecución en consola con Playwright.
-  ![alt text](image-9.png)
-* Colección de Postman exportada en formato JSON.
-* Archivo JavaScript de automatización.
-* Reporte HTML.
-  ![alt text](image-8.png)
+  ![alt text](Evidences/image-17.png)
+

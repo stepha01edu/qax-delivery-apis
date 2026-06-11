@@ -124,7 +124,7 @@ Stage_2/
         ├── utils/
         │   ├── dataGenerator.js
         │   └── tmpEmailReader.js
-        ├── evidencias/
+        ├── Evidences/
         ├── playwright.config.js
         ├── package.json
         └── README.md
@@ -401,7 +401,7 @@ evidencias/
 Referencia de la evidencia:
 
 ```markdown
-![Evidencia](Evidences/image.png)
+![Evidencia](qax-project-st-2-exe/Evidences/image.png)
 
 
 ```

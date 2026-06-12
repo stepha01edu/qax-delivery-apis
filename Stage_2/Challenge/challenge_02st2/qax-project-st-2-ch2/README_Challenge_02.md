@@ -398,7 +398,8 @@ La evidencia principal corresponde a una captura donde se observa la ejecución 
 Referencia de la evidencia:
 
 ```markdown
-![Ejecución exitosa Book Store API](qax-project-st-2-ch2/Evidences/ejecucion-book-store-api.png)
+![Ejecución exitosa Book Store API](evidencias/image01.png)
+![Reporte](image.png)
 ```
 
 ---

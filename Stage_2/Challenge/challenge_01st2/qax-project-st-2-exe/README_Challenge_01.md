@@ -401,7 +401,7 @@ evidencias/
 Referencia de la evidencia:
 
 ```markdown
-![Evidencia](qax-project-st-2-exe/Evidences/image.png)
+![Evidencia](evidences/image.png)
 
 
 ```

@@ -172,5 +172,6 @@ test.describe.serial('Recuperacion de Contraseña por Correo Electrónico', () =
         console.log('✅ Login con nueva contraseña exitoso');
         expect(body.data.email).toBe(usuarioDinamico.email);
     });
+
     console.log('Flujo completado con exito');  // porque no se esta mostrando este log?
 });

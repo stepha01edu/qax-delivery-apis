@@ -1,0 +1,14 @@
+
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/playwright-report-e2e/
+/playwright-report-regression/
+/playwright-report-smoke/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
+
+# Environment files
+.env.dev

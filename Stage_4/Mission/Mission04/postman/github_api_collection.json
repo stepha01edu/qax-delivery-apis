@@ -1,0 +1,547 @@
+{
+  "info": {
+    "_postman_id": "6c94019d-7d44-4d8c-9398-7f2af706b7b4",
+    "name": "Mission 4 - GitHub API TypeScript",
+    "description": "Coleccion Postman basica para Mission 4. Configura las variables githubToken, githubUsername, repoName y baseBranchSha antes de ejecutar algunos requests.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{githubToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Usuarios",
+      "item": [
+        {
+          "name": "CP01 - Consultar usuario",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.github+json"
+              },
+              {
+                "key": "X-GitHub-Api-Version",
+                "value": "2022-11-28"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{githubUsername}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{githubUsername}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "CP02 - Consultar usuario inexistente",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.github+json"
+              },
+              {
+                "key": "X-GitHub-Api-Version",
+                "value": "2022-11-28"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/usuario-inexistente-qax-123456789",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "usuario-inexistente-qax-123456789"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Repositorios",
+      "item": [
+        {
+          "name": "CP03 - Crear repositorio",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.github+json"
+              },
+              {
+                "key": "X-GitHub-Api-Version",
+                "value": "2022-11-28"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{repoName}}\",\n  \"description\": \"Repository created from Postman collection\",\n  \"private\": false,\n  \"has_issues\": true,\n  \"auto_init\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/repos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "repos"
+              ]
+            }
+          }
+        },
+        {
+          "name": "CP04 - Consultar repositorio",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.github+json"
+              },
+              {
+                "key": "X-GitHub-Api-Version",
+                "value": "2022-11-28"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/repos/{{githubUsername}}/{{repoName}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "repos",
+                "{{githubUsername}}",
+                "{{repoName}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "CP05 - Actualizar repositorio",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.github+json"
+              },
+              {
+                "key": "X-GitHub-Api-Version",
+                "value": "2022-11-28"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Repository updated from Postman collection\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/repos/{{githubUsername}}/{{repoName}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "repos",
+                "{{githubUsername}}",
+                "{{repoName}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "CP06 - Crear repositorio con nombre invalido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.github+json"
+              },
+              {
+                "key": "X-GitHub-Api-Version",
+                "value": "2022-11-28"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"\",\n  \"description\": \"Invalid repo created for negative testing\",\n  \"private\": false,\n  \"has_issues\": true,\n  \"auto_init\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/repos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "repos"
+              ]
+            }
+          }
+        },
+        {
+          "name": "CP07 - Consultar repositorio inexistente",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.github+json"
+              },
+              {
+                "key": "X-GitHub-Api-Version",
+                "value": "2022-11-28"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/repos/{{githubUsername}}/repo-inexistente-qax-123456789",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "repos",
+                "{{githubUsername}}",
+                "repo-inexistente-qax-123456789"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Issues",
+      "item": [
+        {
+          "name": "CP08 - Listar issues",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.github+json"
+              },
+              {
+                "key": "X-GitHub-Api-Version",
+                "value": "2022-11-28"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/repos/{{githubUsername}}/{{repoName}}/issues",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "repos",
+                "{{githubUsername}}",
+                "{{repoName}}",
+                "issues"
+              ]
+            }
+          }
+        },
+        {
+          "name": "CP09 - Crear issue",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.github+json"
+              },
+              {
+                "key": "X-GitHub-Api-Version",
+                "value": "2022-11-28"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"{{issueTitle}}\",\n  \"body\": \"Issue created from Postman collection\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/repos/{{githubUsername}}/{{repoName}}/issues",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "repos",
+                "{{githubUsername}}",
+                "{{repoName}}",
+                "issues"
+              ]
+            }
+          }
+        },
+        {
+          "name": "CP10 - Buscar issues",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.github+json"
+              },
+              {
+                "key": "X-GitHub-Api-Version",
+                "value": "2022-11-28"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/search/issues?q={{issueSearchQuery}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search",
+                "issues"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "{{issueSearchQuery}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "CP11 - Crear issue sin token",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.github+json"
+              },
+              {
+                "key": "X-GitHub-Api-Version",
+                "value": "2022-11-28"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Issue without token\",\n  \"body\": \"This request must fail because it does not send Authorization Bearer\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/repos/{{githubUsername}}/{{repoName}}/issues",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "repos",
+                "{{githubUsername}}",
+                "{{repoName}}",
+                "issues"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Commits y ramas",
+      "item": [
+        {
+          "name": "CP12 - Listar ramas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.github+json"
+              },
+              {
+                "key": "X-GitHub-Api-Version",
+                "value": "2022-11-28"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/repos/{{githubUsername}}/{{repoName}}/branches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "repos",
+                "{{githubUsername}}",
+                "{{repoName}}",
+                "branches"
+              ]
+            }
+          }
+        },
+        {
+          "name": "CP13 - Crear rama via git refs",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.github+json"
+              },
+              {
+                "key": "X-GitHub-Api-Version",
+                "value": "2022-11-28"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ref\": \"refs/heads/{{newBranchName}}\",\n  \"sha\": \"{{baseBranchSha}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/repos/{{githubUsername}}/{{repoName}}/git/refs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "repos",
+                "{{githubUsername}}",
+                "{{repoName}}",
+                "git",
+                "refs"
+              ]
+            }
+          }
+        },
+        {
+          "name": "CP14 - Consultar commits",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.github+json"
+              },
+              {
+                "key": "X-GitHub-Api-Version",
+                "value": "2022-11-28"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/repos/{{githubUsername}}/{{repoName}}/commits",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "repos",
+                "{{githubUsername}}",
+                "{{repoName}}",
+                "commits"
+              ]
+            }
+          }
+        },
+        {
+          "name": "CP15 - Consultar contribuidores",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.github+json"
+              },
+              {
+                "key": "X-GitHub-Api-Version",
+                "value": "2022-11-28"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/repos/{{githubUsername}}/{{repoName}}/contributors",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "repos",
+                "{{githubUsername}}",
+                "{{repoName}}",
+                "contributors"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://api.github.com",
+      "type": "string"
+    },
+    {
+      "key": "githubToken",
+      "value": "tu_token_github",
+      "type": "string"
+    },
+    {
+      "key": "githubUsername",
+      "value": "tu_usuario_github",
+      "type": "string"
+    },
+    {
+      "key": "repoName",
+      "value": "qax-api-postman-practica",
+      "type": "string"
+    },
+    {
+      "key": "issueTitle",
+      "value": "Issue created from Postman",
+      "type": "string"
+    },
+    {
+      "key": "issueSearchQuery",
+      "value": "repo:tu_usuario_github/qax-api-postman-practica",
+      "type": "string"
+    },
+    {
+      "key": "newBranchName",
+      "value": "feature/qax-postman",
+      "type": "string"
+    },
+    {
+      "key": "baseBranchSha",
+      "value": "pega_aqui_el_sha_de_la_rama_main",
+      "type": "string"
+    }
+  ]
+}

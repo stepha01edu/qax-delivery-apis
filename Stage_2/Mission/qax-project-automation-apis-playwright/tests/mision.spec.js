@@ -13,9 +13,6 @@ test.describe.serial('Mission 2 - E2E API Testing Platzi Fake Store', () => {
     let accessToken;
     let refreshToken;
 
-    let productData;
-    let productId;
-
     let categoryData;
     let categoryId;
 
@@ -347,6 +344,42 @@ test.describe.serial('Mission 2 - E2E API Testing Platzi Fake Store', () => {
         expect(productFound).toBeDefined();
         expect(productFound.title).toBe(productWithCategoryData.title);
         expect(productFound.category.id).toBe(categoryId);
+    });
+
+    // Files - Upload de archivo:-------------------------------------
+
+    test('CP14 - Subir archivo correctamente @E2E', async ({ request }) => {
+        // 1. Creamos un archivo simple en memoria para probar el upload
+        const fileContent = Buffer.from('Archivo de prueba para Mission 2');
+        const fileName = `practica-${Date.now()}.txt`;
+
+        // 2. Hacemos la petición POST usando multipart/form-data
+        const response = await request.post('files/upload', {
+            headers: {
+                Authorization: `Bearer ${accessToken}`
+            },
+            multipart: {
+                file: {
+                    name: fileName,
+                    mimeType: 'text/plain',
+                    buffer: fileContent
+                }
+            }
+        });
+
+        // 3. Validamos el Status Code
+        expect(response.status()).toBe(201);
+
+        // 4. Leemos el JSON de la respuesta
+        const responseBody = await response.json();
+
+        // 5. Mostramos la respuesta del upload
+        console.log('Archivo subido:', responseBody);
+
+        // 6. Validamos que la API devuelva información del archivo
+        expect(responseBody.originalname).toBe(fileName);
+        expect(responseBody.filename).toBeDefined();
+        expect(responseBody.location).toBeDefined();
     });
 
 });

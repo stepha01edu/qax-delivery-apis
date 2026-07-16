@@ -32,8 +32,7 @@ Módulos trabajados en esta entrega:
 - Auth
 - Categories
 - Products
-
-El módulo Files fue revisado como parte del alcance de la misión, pero no fue automatizado en esta versión.
+- Files
 
 ---
 
@@ -50,13 +49,16 @@ El módulo Files fue revisado como parte del alcance de la misión, pero no fue 
 ## Estructura del proyecto
 
 ```text
-qax-project-automation-apis-playwright/
+platzi-fake-store-api/
 │
 ├── tests/
-│   └── mission2-e2e.spec.js
+│   └── mision.spec.js
 │
 ├── utils/
 │   └── dataGenerator.js
+│
+├── Evidencias/
+│   └── image.png
 │
 ├── playwright.config.js
 ├── package.json
@@ -72,10 +74,7 @@ La Base URL fue configurada en el archivo `playwright.config.js`.
 
 ```js
 use: {
-    baseURL: 'https://api.escuelajs.co/api/v1/',
-    extraHTTPHeaders: {
-        'Content-Type': 'application/json'
-    }
+    baseURL: 'https://api.escuelajs.co/api/v1/'
 }
 ```
 
@@ -86,6 +85,13 @@ users
 auth/login
 categories/
 products/
+files/upload
+```
+
+Nota importante:
+
+```text
+No se deja Content-Type global en la configuración porque el upload de archivos usa multipart/form-data.
 ```
 
 ---
@@ -95,17 +101,10 @@ products/
 El flujo automatizado se encuentra en:
 
 ```text
-tests/mission2-e2e.spec.js
+tests/mision.spec.js
 ```
 
 El test se ejecuta de forma serial porque cada paso depende de información generada en pasos anteriores.
-
-Ejemplo:
-
-- El `userId` se obtiene al crear el usuario.
-- El `accessToken` se obtiene al hacer login.
-- El `categoryId` se obtiene al crear la categoría.
-- El `productId` se obtiene al crear el producto.
 
 ---
 
@@ -128,6 +127,96 @@ generateProductData(categoryId)
 ```
 
 Estas funciones ayudan a evitar datos repetidos y permiten reutilizar información entre requests.
+
+---
+
+## Diseño de casos en Gherkin
+
+```gherkin
+Feature: E2E API Testing - Platzi Fake Store
+
+  Como QA Automation
+  Quiero validar los módulos principales de Platzi Fake Store
+  Para asegurar que los flujos de API funcionen correctamente
+
+  Background:
+    Given que la API de Platzi Fake Store está disponible
+
+  Scenario: CP01 - Crear usuario con datos dinámicos
+    When envío una petición POST al endpoint /users con datos válidos
+    Then el sistema debe crear el usuario correctamente
+    And debe devolver un id válido
+
+  Scenario: CP02 - Consultar usuario creado por ID
+    Given que existe un usuario creado
+    When consulto el endpoint /users/{id}
+    Then el sistema debe devolver los datos del usuario
+    And el email debe coincidir con el enviado
+
+  Scenario: CP03 - Verificar usuario creado en la lista
+    Given que existe un usuario creado
+    When consulto el endpoint /users
+    Then el usuario creado debe aparecer en la lista
+
+  Scenario: CP04 - Login con usuario creado
+    Given que existe un usuario creado
+    When envío sus credenciales al endpoint /auth/login
+    Then el sistema debe devolver access_token
+    And debe devolver refresh_token
+
+  Scenario: CP05 - Consultar profile con token
+    Given que tengo un access_token válido
+    When consulto el endpoint /auth/profile usando Bearer Token
+    Then el sistema debe devolver el profile del usuario autenticado
+
+  Scenario: CP06 - Obtener nuevo token usando refresh token
+    Given que tengo un refresh_token válido
+    When envío el refresh_token al endpoint /auth/refresh-token
+    Then el sistema debe devolver un nuevo access_token
+
+  Scenario: CP07 - Crear categoría con datos dinámicos
+    When envío una petición POST al endpoint /categories con datos válidos
+    Then el sistema debe crear la categoría correctamente
+    And debe devolver un id válido
+
+  Scenario: CP08 - Consultar categoría creada
+    Given que existe una categoría creada
+    When consulto el endpoint /categories/{id}
+    Then el sistema debe devolver la categoría creada
+
+  Scenario: CP09 - Crear producto asociado a una categoría
+    Given que existe una categoría creada
+    When envío una petición POST al endpoint /products usando el categoryId
+    Then el sistema debe crear el producto correctamente
+    And el producto debe quedar asociado a la categoría
+
+  Scenario: CP10 - Consultar producto creado
+    Given que existe un producto creado
+    When consulto el endpoint /products/{id}
+    Then el sistema debe devolver el producto creado
+    And la categoría asociada debe coincidir
+
+  Scenario: CP11 - Verificar producto en la lista de productos de la categoría
+    Given que existe un producto asociado a una categoría
+    When consulto el endpoint /categories/{id}/products
+    Then el producto debe aparecer dentro de esa categoría
+
+  Scenario: CP12 - Verificar categoría creada en la lista
+    Given que existe una categoría creada
+    When consulto el endpoint /categories
+    Then la categoría creada debe aparecer en la lista
+
+  Scenario: CP13 - Verificar producto creado en la lista de productos
+    Given que existe un producto creado
+    When consulto el endpoint /products
+    Then el producto debe aparecer en la lista
+    And debe mantener la categoría asociada
+
+  Scenario: CP14 - Subir archivo correctamente
+    When envío una petición POST al endpoint /files/upload con un archivo válido
+    Then el sistema debe subir el archivo correctamente
+    And debe devolver información del archivo cargado
+```
 
 ---
 
@@ -168,7 +257,6 @@ Validaciones realizadas:
 - Se hace login con el usuario creado.
 - La respuesta contiene `access_token`.
 - La respuesta contiene `refresh_token`.
-- El token no viene vacío.
 - El token se usa para consultar el profile.
 - Se obtiene un nuevo token usando refresh token.
 
@@ -207,12 +295,28 @@ GET /api/v1/products
 
 Validaciones realizadas:
 
-- Se crea un producto usando token.
-- El producto se crea asociado al `categoryId` generado previamente.
+- Se crea un producto asociado al `categoryId` generado previamente.
 - La respuesta contiene un `id`.
 - El producto creado se consulta por ID.
 - El producto aparece en la lista de productos.
 - El producto mantiene la categoría asociada correctamente.
+
+---
+
+### 5. Files
+
+Endpoint automatizado:
+
+```text
+POST /api/v1/files/upload
+```
+
+Validaciones realizadas:
+
+- Se sube un archivo usando `multipart/form-data`.
+- La respuesta devuelve `originalname`.
+- La respuesta devuelve `filename`.
+- La respuesta devuelve `location`.
 
 ---
 
@@ -238,6 +342,7 @@ El flujo principal automatizado fue:
 15. Verificar que el producto aparece en la lista de productos de la categoría.
 16. Verificar que la categoría creada aparece en la lista de categorías.
 17. Verificar que el producto creado aparece en la lista de productos y tiene la categoría asociada.
+18. Subir archivo usando el endpoint Files.
 ```
 
 ---
@@ -373,6 +478,7 @@ Esto evita subir dependencias, reportes y archivos temporales al repositorio.
 ## Evidencias
 
 ![Evidencia de ejecucion](Evidencias/image.png)
+![Evidencia de ejecucion E2E](Evidencias/image_e2e.png)
 
 ---
 
@@ -383,6 +489,8 @@ Esto evita subir dependencias, reportes y archivos temporales al repositorio.
 - El test se ejecuta de forma serial porque hay dependencias entre requests.
 - El token obtenido en login se reutiliza en endpoints protegidos.
 - El producto se crea usando la categoría generada durante la prueba.
+- El módulo Files fue automatizado con upload de archivo en memoria.
+- No se usa `Content-Type` global porque el upload necesita `multipart/form-data`.
 
 ---
 
@@ -401,6 +509,7 @@ Se validó un flujo E2E con:
 - Creación de producto asociado a categoría.
 - Validaciones por ID.
 - Validaciones en listas.
+- Upload de archivo.
 - Datos dinámicos.
 
 El objetivo fue demostrar que se puede leer Swagger, entender cómo se conectan los endpoints y automatizar un flujo completo de API.

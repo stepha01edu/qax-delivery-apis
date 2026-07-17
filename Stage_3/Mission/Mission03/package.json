@@ -1,0 +1,16 @@
+{
+  "name": "Mission03",
+  "version": "1.0.0",
+  "description": "Mission 3 - GitHub API Automation with Playwright",
+  "scripts": {
+    "test": "playwright test",
+    "test:smoke": "playwright test --grep @smoke",
+    "test:e2e": "playwright test --grep @e2e",
+    "test:regression": "playwright test --grep @regression",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.54.0",
+    "dotenv": "^16.4.5"
+  }
+}

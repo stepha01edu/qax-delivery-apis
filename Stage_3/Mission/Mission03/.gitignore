@@ -1,0 +1,16 @@
+
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/playwright-report-e2e/
+/playwright-report-regression/
+/playwright-report-smoke/
+/playwright-report-total/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
+.env
+.env.dev
+.env.local
+.DS_Store

@@ -1,4 +1,4 @@
-const { test, expect } = require('@playwright/test');
+const { test, expect, request: playwrightRequest } = require('@playwright/test');
 const { GithubRepoService } = require('../src/services/githubRepoService');
 const { createRepoModel, updateRepoModel } = require('../src/models/repoModel');
 
@@ -11,7 +11,7 @@ test.describe.serial('Mission 3 - GitHub Repositories API', () => {
 
     // Repositorios - Crear repositorio:-------------------------------------
 
-    test('CP01 - Crear repositorio correctamente @regression', async ({ request }) => {
+    test('CP01 - Crear repositorio correctamente @e2e @regression', async ({ request }) => {
         // 1. Creamos el service de repositorios
         const repoService = new GithubRepoService(request);
 
@@ -44,7 +44,7 @@ test.describe.serial('Mission 3 - GitHub Repositories API', () => {
 
     // Repositorios - Consultar repositorio creado:-------------------------------------
 
-    test('CP02 - Consultar repositorio creado @regression', async ({ request }) => {
+    test('CP02 - Consultar repositorio creado @e2e @regression', async ({ request }) => {
         // 1. Creamos el service de repositorios
         const repoService = new GithubRepoService(request);
 
@@ -67,7 +67,7 @@ test.describe.serial('Mission 3 - GitHub Repositories API', () => {
 
     // Repositorios - Actualizar repositorio:-------------------------------------
 
-    test('CP03 - Actualizar repositorio parcialmente @regression', async ({ request }) => {
+    test('CP03 - Actualizar repositorio parcialmente @e2e @regression', async ({ request }) => {
         // 1. Creamos el service de repositorios
         const repoService = new GithubRepoService(request);
 
@@ -89,5 +89,100 @@ test.describe.serial('Mission 3 - GitHub Repositories API', () => {
         // 7. Validamos que la descripción haya cambiado
         expect(responseBody.name).toBe(repoName);
         expect(responseBody.description).toBe(updateData.description);
+    });
+
+    // Negative Testing - Crear repo con nombre inválido:-------------------------------------
+
+    test('CP04 - Crear repositorio con nombre inválido debe retornar error @regression', async ({ request }) => {
+        // 1. Creamos el service de repositorios
+        const repoService = new GithubRepoService(request);
+
+        // 2. Creamos un body inválido con name vacío
+        const invalidRepoData = {
+            name: '',
+            description: 'Invalid repo created for negative testing',
+            private: false,
+            has_issues: true
+        };
+
+        // 3. Intentamos crear el repositorio
+        const response = await repoService.createRepo(invalidRepoData);
+
+        // 4. Validamos que GitHub rechace la petición
+        expect(response.status()).toBe(422);
+
+        // 5. Leemos la respuesta de error
+        const responseBody = await response.json();
+
+        // 6. Mostramos el error
+        console.log('Respuesta repo inválido:', responseBody);
+
+        // 7. Validamos que exista mensaje de error
+        expect(responseBody.message).toBeDefined();
+    });
+
+    // Negative Testing - Consultar repo inexistente:-------------------------------------
+
+    test('CP05 - Consultar repositorio inexistente debe retornar 404 @regression', async ({ request }) => {
+        // 1. Creamos el service de repositorios
+        const repoService = new GithubRepoService(request);
+
+        // 2. Consultamos un repositorio que no existe
+        const response = await repoService.getRepo(githubUsername, 'repo-inexistente-qax-123456789');
+
+        // 3. Validamos que GitHub responda 404
+        expect(response.status()).toBe(404);
+
+        // 4. Leemos la respuesta de error
+        const responseBody = await response.json();
+
+        // 5. Mostramos el error
+        console.log('Respuesta repo inexistente:', responseBody);
+
+        // 6. Validamos que exista mensaje de error
+        expect(responseBody.message).toBeDefined();
+    });
+
+    // Negative Testing - Crear repo sin token:-------------------------------------
+
+    test('CP06 - Crear repositorio sin token debe retornar 401 @regression', async () => {
+        // 1. Creamos un contexto nuevo sin Authorization Bearer
+        const requestWithoutToken = await playwrightRequest.newContext({
+            baseURL: process.env.BASE_URL,
+            extraHTTPHeaders: {
+                Accept: 'application/vnd.github+json',
+                'X-GitHub-Api-Version': '2022-11-28'
+            }
+        });
+
+        // 2. Creamos un body válido para aislar la validación de autenticación
+        const repoDataWithoutToken = createRepoModel();
+
+        // 3. Intentamos crear el repositorio sin token
+        const response = await requestWithoutToken.post('/user/repos', {
+            data: repoDataWithoutToken
+        });
+
+        // 4. Validamos que GitHub rechace la petición por falta de autenticación
+        expect(response.status()).toBe(401);
+
+        // 5. Leemos la respuesta de error
+        const responseBody = await response.json();
+
+        // 6. Mostramos el error
+        console.log('Respuesta crear repo sin token:', responseBody);
+
+        // 7. Validamos que exista mensaje de error
+        expect(responseBody.message).toBeDefined();
+
+        // 8. Cerramos el contexto creado manualmente
+        await requestWithoutToken.dispose();
+    });
+
+    // Escenario no implementado:-------------------------------------
+
+    test.fixme('CP07 - Eliminar repositorio creado @regression', async () => {
+        // Este escenario queda marcado como fixme porque DELETE repo es destructivo.
+        // Para esta misión no se implementa para evitar borrar información por error.
     });
 });

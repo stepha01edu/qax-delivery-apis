@@ -1,8 +1,8 @@
 function createRepoModel() {
-    const randomNumber = Date.now();
+    const randomNumber = Math.floor(Math.random() * 100000);
 
     return {
-        name: `qa-api-repo-${randomNumber}`,
+        name: `qa-api-repo-${Date.now()}-${randomNumber}`,
         description: 'Repository created from Playwright API automation',
         private: false,
         has_issues: true

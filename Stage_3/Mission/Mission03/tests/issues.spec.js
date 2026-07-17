@@ -1,4 +1,4 @@
-const { test, expect } = require('@playwright/test');
+const { test, expect, request: playwrightRequest } = require('@playwright/test');
 const { GithubRepoService } = require('../src/services/githubRepoService');
 const { GithubIssueService } = require('../src/services/githubIssueService');
 const { createRepoModel } = require('../src/models/repoModel');
@@ -13,7 +13,7 @@ test.describe.serial('Mission 3 - GitHub Issues API', () => {
 
     // Precondición - Crear repositorio para probar issues:-------------------------------------
 
-    test('CP01 - Crear repositorio para pruebas de issues @regression', async ({ request }) => {
+    test('CP01 - Crear repositorio para pruebas de issues @e2e @regression', async ({ request }) => {
         // 1. Creamos el service de repositorios
         const repoService = new GithubRepoService(request);
 
@@ -37,7 +37,7 @@ test.describe.serial('Mission 3 - GitHub Issues API', () => {
 
     // Issues - Listar issues:-------------------------------------
 
-    test('CP02 - Listar issues del repositorio @regression', async ({ request }) => {
+    test('CP02 - Listar issues del repositorio @e2e @regression', async ({ request }) => {
         // 1. Creamos el service de issues
         const issueService = new GithubIssueService(request);
 
@@ -59,7 +59,7 @@ test.describe.serial('Mission 3 - GitHub Issues API', () => {
 
     // Issues - Crear issue:-------------------------------------
 
-    test('CP03 - Crear issue en el repositorio @regression', async ({ request }) => {
+    test('CP03 - Crear issue en el repositorio @e2e @regression', async ({ request }) => {
         // 1. Creamos el service de issues
         const issueService = new GithubIssueService(request);
 
@@ -84,5 +84,41 @@ test.describe.serial('Mission 3 - GitHub Issues API', () => {
         expect(responseBody.title).toBe(issueData.title);
         expect(responseBody.body).toBe(issueData.body);
         expect(responseBody.state).toBe('open');
+    });
+
+    // Negative Testing - Crear issue sin token:-------------------------------------
+
+    test('CP04 - Crear issue sin token debe retornar 401 @regression', async () => {
+        // 1. Creamos un contexto nuevo sin Authorization Bearer
+        const requestWithoutToken = await playwrightRequest.newContext({
+            baseURL: process.env.BASE_URL,
+            extraHTTPHeaders: {
+                Accept: 'application/vnd.github+json',
+                'X-GitHub-Api-Version': '2022-11-28'
+            }
+        });
+
+        // 2. Creamos data para el issue
+        const issueDataWithoutToken = createIssueModel();
+
+        // 3. Intentamos crear un issue sin token
+        const response = await requestWithoutToken.post(`/repos/${githubUsername}/${repoName}/issues`, {
+            data: issueDataWithoutToken
+        });
+
+        // 4. Validamos que GitHub rechace la petición
+        expect(response.status()).toBe(401);
+
+        // 5. Leemos la respuesta de error
+        const responseBody = await response.json();
+
+        // 6. Mostramos el error
+        console.log('Respuesta crear issue sin token:', responseBody);
+
+        // 7. Validamos que exista mensaje de error
+        expect(responseBody.message).toBeDefined();
+
+        // 8. Cerramos el contexto creado manualmente
+        await requestWithoutToken.dispose();
     });
 });

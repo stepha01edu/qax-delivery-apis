@@ -1,0 +1,427 @@
+{
+  "info": {
+    "_postman_id": "44df9b91-a062-4ef4-a96e-2cbb7f7a0a9b",
+    "name": "Mission 3 - GitHub API",
+    "description": "Coleccion Postman para Mission 3. Usa variables de coleccion para no hardcodear token ni usuario.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{githubToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "CP01 - Consultar informacion de usuario",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.github+json"
+              },
+              {
+                "key": "X-GitHub-Api-Version",
+                "value": "2022-11-28"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{githubUsername}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{githubUsername}}"
+              ]
+            },
+            "description": "Consulta el usuario configurado en la variable githubUsername."
+          }
+        },
+        {
+          "name": "CP02 - Consultar usuario inexistente",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.github+json"
+              },
+              {
+                "key": "X-GitHub-Api-Version",
+                "value": "2022-11-28"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/usuario-inexistente-qax-123456789",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "usuario-inexistente-qax-123456789"
+              ]
+            },
+            "description": "Prueba negativa para validar usuario inexistente."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Repos",
+      "item": [
+        {
+          "name": "CP03 - Crear repositorio correctamente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.github+json"
+              },
+              {
+                "key": "X-GitHub-Api-Version",
+                "value": "2022-11-28"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{repoName}}\",\n  \"description\": \"Repository created from Postman collection\",\n  \"private\": false,\n  \"has_issues\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/repos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "repos"
+              ]
+            },
+            "description": "Crea un repositorio publico con nombre dinamico y guarda repoName para los siguientes requests."
+          }
+        },
+        {
+          "name": "CP04 - Consultar repositorio creado",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.github+json"
+              },
+              {
+                "key": "X-GitHub-Api-Version",
+                "value": "2022-11-28"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/repos/{{githubUsername}}/{{repoName}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "repos",
+                "{{githubUsername}}",
+                "{{repoName}}"
+              ]
+            },
+            "description": "Consulta el repositorio creado en CP03."
+          }
+        },
+        {
+          "name": "CP05 - Actualizar repositorio parcialmente",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.github+json"
+              },
+              {
+                "key": "X-GitHub-Api-Version",
+                "value": "2022-11-28"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Repository updated from Postman collection\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/repos/{{githubUsername}}/{{repoName}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "repos",
+                "{{githubUsername}}",
+                "{{repoName}}"
+              ]
+            },
+            "description": "Actualiza parcialmente la descripcion del repositorio creado."
+          }
+        },
+        {
+          "name": "CP06 - Crear repositorio con nombre invalido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.github+json"
+              },
+              {
+                "key": "X-GitHub-Api-Version",
+                "value": "2022-11-28"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"\",\n  \"description\": \"Invalid repo created for negative testing\",\n  \"private\": false,\n  \"has_issues\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/repos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "repos"
+              ]
+            },
+            "description": "Prueba negativa para repo con name vacio."
+          }
+        },
+        {
+          "name": "CP07 - Consultar repositorio inexistente",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.github+json"
+              },
+              {
+                "key": "X-GitHub-Api-Version",
+                "value": "2022-11-28"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/repos/{{githubUsername}}/repo-inexistente-qax-123456789",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "repos",
+                "{{githubUsername}}",
+                "repo-inexistente-qax-123456789"
+              ]
+            },
+            "description": "Prueba negativa para repo inexistente."
+          }
+        },
+        {
+          "name": "CP08 - Crear repositorio sin token",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.github+json"
+              },
+              {
+                "key": "X-GitHub-Api-Version",
+                "value": "2022-11-28"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{repoName}}-sin-token\",\n  \"description\": \"This request must fail because it does not send Authorization Bearer.\",\n  \"private\": false,\n  \"has_issues\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/repos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "repos"
+              ]
+            },
+            "description": "Prueba negativa: intenta crear un repositorio sin Authorization Bearer."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Issues",
+      "item": [
+        {
+          "name": "CP09 - Listar issues del repositorio",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.github+json"
+              },
+              {
+                "key": "X-GitHub-Api-Version",
+                "value": "2022-11-28"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/repos/{{githubUsername}}/{{repoName}}/issues",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "repos",
+                "{{githubUsername}}",
+                "{{repoName}}",
+                "issues"
+              ]
+            },
+            "description": "Lista issues del repositorio creado en CP03."
+          }
+        },
+        {
+          "name": "CP10 - Crear issue en repositorio",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.github+json"
+              },
+              {
+                "key": "X-GitHub-Api-Version",
+                "value": "2022-11-28"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"{{issueTitle}}\",\n  \"body\": \"This issue was created from Postman collection.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/repos/{{githubUsername}}/{{repoName}}/issues",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "repos",
+                "{{githubUsername}}",
+                "{{repoName}}",
+                "issues"
+              ]
+            },
+            "description": "Crea un issue en el repositorio creado."
+          }
+        },
+        {
+          "name": "CP11 - Crear issue sin token",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/vnd.github+json"
+              },
+              {
+                "key": "X-GitHub-Api-Version",
+                "value": "2022-11-28"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Issue without token from Postman\",\n  \"body\": \"This request must fail because it does not send Authorization Bearer.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/repos/{{githubUsername}}/{{repoName}}/issues",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "repos",
+                "{{githubUsername}}",
+                "{{repoName}}",
+                "issues"
+              ]
+            },
+            "description": "Prueba negativa: intenta crear issue sin Authorization Bearer."
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://api.github.com",
+      "type": "string"
+    },
+    {
+      "key": "githubToken",
+      "value": "tu_token_github",
+      "type": "string"
+    },
+    {
+      "key": "githubUsername",
+      "value": "tu_usuario_github",
+      "type": "string"
+    },
+    {
+      "key": "repoName",
+      "value": "qa-api-postman-practica",
+      "type": "string"
+    },
+    {
+      "key": "issueTitle",
+      "value": "Issue created from Postman",
+      "type": "string"
+    },
+    {
+      "key": "issueNumber",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

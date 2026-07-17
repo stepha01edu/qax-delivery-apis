@@ -4,15 +4,15 @@
 
 Esta misión corresponde al cierre del Stage 3 de automatización API.
 
-El objetivo fue automatizar flujos principales de la GitHub REST API usando Playwright, aplicando los conceptos vistos durante el stage:
+El objetivo es trabajar con la GitHub REST API aplicando los conceptos vistos durante el stage:
 
 - Modelos.
 - API Service Layer.
 - Variables de entorno.
 - Autenticación con Personal Access Token.
-- Tags de ejecución.
-- Validaciones con `expect`.
+- Playwright API Testing.
 - Colección de Postman.
+- Pruebas positivas y negativas.
 
 API utilizada:
 
@@ -24,21 +24,22 @@ https://api.github.com
 
 ## Objetivo
 
-Validar los siguientes flujos de la GitHub API:
+Automatizar flujos principales de la GitHub API, incluyendo:
 
-- Consultar información de un usuario.
-- Crear, consultar y actualizar repositorios.
-- Listar y crear issues en un repositorio.
+- Consulta de información de usuario.
+- Creación, consulta y actualización de repositorios.
+- Listado y creación de issues.
+- Validaciones positivas y negativas.
 
 ---
 
 ## Autenticación
 
-Algunas operaciones de GitHub requieren autenticación con un Personal Access Token.
+Algunas operaciones requieren autenticación con un Personal Access Token de GitHub.
 
-El token se guarda en el archivo `.env.dev` y no se escribe directamente en el código.
+El token debe guardarse en un archivo `.env.dev` y nunca escribirse directamente en el código.
 
-Ejemplo del archivo `.env.dev`:
+Ejemplo:
 
 ```env
 BASE_URL=https://api.github.com
@@ -47,13 +48,7 @@ GITHUB_USERNAME=tu_usuario_github
 ENVIRONMENT=dev
 ```
 
-Importante:
-
-```text
-.env.dev no debe subirse al repositorio.
-```
-
-Por eso debe estar agregado en `.gitignore`.
+El archivo `.env.dev` debe estar incluido en `.gitignore`.
 
 ---
 
@@ -77,7 +72,10 @@ Mission03/
 │       ├── githubRepoService.js
 │       └── githubIssueService.js
 │
-├── .env.example
+├── postman/
+│   └── github_api_collection.json
+│
+├── .env.dev
 ├── .gitignore
 ├── package.json
 ├── playwright.config.js
@@ -86,7 +84,26 @@ Mission03/
 
 ---
 
-## ¿Cómo está organizado el código?
+## Organización del código
+
+### models/
+
+Contiene funciones para generar bodies dinámicos.
+
+```text
+repoModel.js
+issueModel.js
+```
+
+### services/
+
+Contiene las llamadas centralizadas a la API.
+
+```text
+githubUserService.js
+githubRepoService.js
+githubIssueService.js
+```
 
 ### tests/
 
@@ -98,31 +115,122 @@ repos.spec.js
 issues.spec.js
 ```
 
-### src/models/
+---
 
-Contiene los modelos usados para construir los bodies de los requests.
+## Casos de prueba en Gherkin
 
-```text
-repoModel.js
-issueModel.js
-```
+```gherkin
+Feature: HU1 - Consultar información de usuario
 
-### src/services/
+  Como QA Automation
+  Quiero consultar información de usuarios de GitHub
+  Para validar respuestas exitosas y errores controlados del endpoint de usuarios
 
-Contiene las clases que hacen las llamadas a la API.
+  Background:
+    Given que tengo configurado BASE_URL en el archivo .env.dev
 
-```text
-githubUserService.js
-githubRepoService.js
-githubIssueService.js
-```
+  @smoke @regression
+  Scenario: CP01 - Consultar información de usuario
+    When consulto el endpoint GET /users/{username}
+    Then la respuesta debe tener status 200
+    And el campo login no debe estar vacío
+    And el campo id debe ser mayor a 0
+    And avatar_url debe iniciar con https://
+    And repos_url debe iniciar con https://
+    And type debe estar presente
 
-La idea es:
+  @regression
+  Scenario: CP02 - Consultar usuario inexistente
+    When consulto un username que no existe
+    Then la respuesta debe tener status 404
+    And debe devolver un mensaje de error
 
-```text
-El modelo arma la data.
-El service llama a la API.
-El test valida la respuesta.
+
+Feature: HU2 - Gestionar repositorios
+
+  Como QA Automation
+  Quiero crear, consultar y actualizar repositorios en GitHub
+  Para validar flujos positivos, negativos y restricciones de autenticación
+
+  Background:
+    Given que tengo configurado un token válido de GitHub
+    And tengo configurado mi username en el archivo .env.dev
+
+  @e2e @regression
+  Scenario: CP01 - Crear repositorio correctamente
+    When creo un repositorio con datos válidos
+    Then la respuesta debe tener status 201
+    And debe devolver un id válido
+    And el nombre del repositorio debe coincidir con el enviado
+
+  @e2e @regression
+  Scenario: CP02 - Consultar repositorio creado
+    Given que existe un repositorio creado por la automatización
+    When consulto el endpoint GET /repos/{owner}/{repo}
+    Then la respuesta debe tener status 200
+    And el nombre del repositorio debe coincidir
+
+  @e2e @regression
+  Scenario: CP03 - Actualizar repositorio parcialmente
+    Given que existe un repositorio creado por la automatización
+    When actualizo su descripción con PATCH
+    Then la respuesta debe tener status 200
+    And la descripción debe actualizarse correctamente
+
+  @regression
+  Scenario: CP04 - Crear repositorio con nombre inválido
+    When intento crear un repositorio con name vacío
+    Then la respuesta debe tener status 422
+    And debe devolver un mensaje de error
+
+  @regression
+  Scenario: CP05 - Consultar repositorio inexistente
+    When consulto un repositorio que no existe
+    Then la respuesta debe tener status 404
+    And debe devolver un mensaje de error
+
+  @regression
+  Scenario: CP06 - Crear repositorio sin token
+    Given que preparo una petición sin Authorization Bearer
+    When intento crear un repositorio en POST /user/repos
+    Then la respuesta debe tener status 401
+    And debe devolver un mensaje de error
+
+  @regression
+  Scenario: CP07 - Eliminar repositorio creado
+    Given que existe un repositorio creado por la automatización
+    When se evalúa automatizar DELETE /repos/{owner}/{repo}
+    Then el escenario queda marcado con test.fixme por ser destructivo
+
+
+Feature: HU3 - Gestionar issues
+
+  Como QA Automation
+  Quiero listar y crear issues en repositorios de GitHub
+  Para validar el flujo principal de issues y errores de autenticación
+
+  Background:
+    Given que existe un repositorio creado por la automatización
+
+  @e2e @regression
+  Scenario: CP01 - Listar issues de un repositorio
+    When consulto el endpoint GET /repos/{owner}/{repo}/issues
+    Then la respuesta debe tener status 200
+    And la respuesta debe ser una lista
+
+  @e2e @regression
+  Scenario: CP02 - Crear issue en repositorio
+    When creo un issue con título y descripción
+    Then la respuesta debe tener status 201
+    And debe devolver un id válido
+    And debe devolver un number válido
+    And el título debe coincidir con el enviado
+
+  @regression
+  Scenario: CP03 - Crear issue sin token
+    When intento crear un issue sin Authorization Bearer
+    Then la respuesta debe tener status 401
+    And debe devolver un mensaje de error
 ```
 
 ---
@@ -131,159 +239,81 @@ El test valida la respuesta.
 
 | Archivo | Escenario | Tag |
 |---|---|---|
-| users.spec.js | Consultar información de usuario | @smoke |
-| repos.spec.js | Crear repositorio | @regression |
-| repos.spec.js | Consultar repositorio creado | @regression |
-| repos.spec.js | Actualizar repositorio parcialmente | @regression |
-| issues.spec.js | Crear repositorio para issues | @regression |
-| issues.spec.js | Listar issues del repositorio | @regression |
-| issues.spec.js | Crear issue en el repositorio | @regression |
+| users.spec.js | Consultar información de usuario | @smoke @regression |
+| users.spec.js | Consultar usuario inexistente | @regression |
+| repos.spec.js | Crear repositorio | @e2e @regression |
+| repos.spec.js | Consultar repositorio creado | @e2e @regression |
+| repos.spec.js | Actualizar repositorio | @e2e @regression |
+| repos.spec.js | Crear repositorio con nombre inválido | @regression |
+| repos.spec.js | Consultar repositorio inexistente | @regression |
+| repos.spec.js | Crear repositorio sin token | @regression |
+| repos.spec.js | Eliminar repositorio creado | @regression (test.fixme) |
+| issues.spec.js | Crear repositorio para issues | @e2e @regression |
+| issues.spec.js | Listar issues | @e2e @regression |
+| issues.spec.js | Crear issue | @e2e @regression |
+| issues.spec.js | Crear issue sin token | @regression |
 
 ---
 
-## Historias de usuario cubiertas
+## Colección de Postman
 
-### HU1 - Consultar información de usuario
+Se creó una colección de Postman con los endpoints probados en esta misión.
 
-Endpoint:
-
-```text
-GET /users/{username}
-```
-
-Validaciones realizadas:
-
-- `login` no está vacío.
-- `id` es mayor a 0.
-- `avatar_url` contiene `https://`.
-- `repos_url` contiene `https://`.
-- `type` está presente.
-
-Tag:
+Ubicación:
 
 ```text
-@smoke
+postman/github_api_collection.json
 ```
+
+La colección está lista para importar en Postman y contiene:
+
+- GET /users/{username}
+- GET /users/{username-inexistente}
+- POST /user/repos
+- GET /repos/{owner}/{repo}
+- PATCH /repos/{owner}/{repo}
+- POST /user/repos con datos inválidos
+- GET /repos/{owner}/{repo-inexistente}
+- POST /user/repos sin token
+- GET /repos/{owner}/{repo}/issues
+- POST /repos/{owner}/{repo}/issues
+- POST /repos/{owner}/{repo}/issues sin token
+
+Variables de la colección:
+
+```text
+baseUrl
+githubToken
+githubUsername
+repoName
+issueTitle
+issueNumber
+```
+
+Antes de ejecutarla en Postman, se deben actualizar los valores actuales de:
+
+```text
+githubToken
+githubUsername
+repoName
+issueTitle
+```
+
+Para evitar errores por repositorio repetido, cambia `repoName` por un valor único antes de ejecutar `POST /user/repos`.
 
 ---
+## Evidencias
 
-### HU2 - Crear, consultar y actualizar repositorios
+![Ejecucion total](Evidencias/image_total.png)
+![Ejecucion regression](Evidencias/image_regression.png)
+![Ejecucion smoke](Evidencias/image_smoke.png)
+![Ejecucion e2e](Evidencias/image_e2e.png)
 
-Endpoints:
-
-```text
-POST /user/repos
-GET /repos/{owner}/{repo}
-PATCH /repos/{owner}/{repo}
-```
-
-Validaciones realizadas:
-
-- El repositorio se crea correctamente.
-- El response contiene un `id`.
-- El `name` coincide con el enviado.
-- El repositorio creado se puede consultar.
-- El repositorio se puede actualizar parcialmente.
-
-Tag:
-
-```text
-@regression
-```
-
----
-
-### HU3 - Listar y crear issues
-
-Endpoints:
-
-```text
-GET /repos/{owner}/{repo}/issues
-POST /repos/{owner}/{repo}/issues
-```
-
-Validaciones realizadas:
-
-- Se crea un repositorio para probar issues.
-- Se puede listar issues del repositorio.
-- Se puede crear un issue nuevo.
-- El issue retorna `id` y `number`.
-- El `title` coincide con el enviado.
-- El `state` queda en `open`.
-
-Tag:
-
-```text
-@regression
-```
-
----
-
-## Casos de prueba en Gherkin
-
-```gherkin
-Feature: GitHub API Automation
-
-  @smoke
-  Scenario: Consultar información de usuario
-    Given que tengo un username válido de GitHub
-    When consulto el endpoint GET /users/{username}
-    Then la respuesta debe tener status 200
-    And el campo login no debe estar vacío
-    And el campo id debe ser mayor a 0
-    And avatar_url debe contener https://
-    And repos_url debe contener https://
-    And type debe estar presente
-
-  @regression
-  Scenario: Crear repositorio correctamente
-    Given que tengo un token válido de GitHub
-    When creo un repositorio con datos válidos
-    Then la respuesta debe tener status 201
-    And debe devolver un id válido
-    And el nombre del repositorio debe coincidir con el enviado
-
-  @regression
-  Scenario: Consultar repositorio creado
-    Given que existe un repositorio creado por la automatización
-    When consulto el endpoint GET /repos/{owner}/{repo}
-    Then la respuesta debe tener status 200
-    And el nombre del repositorio debe coincidir
-
-  @regression
-  Scenario: Actualizar repositorio parcialmente
-    Given que existe un repositorio creado por la automatización
-    When actualizo su descripción con PATCH
-    Then la respuesta debe tener status 200
-    And la descripción debe actualizarse correctamente
-
-  @regression
-  Scenario: Listar issues de un repositorio
-    Given que existe un repositorio válido
-    When consulto el endpoint GET /repos/{owner}/{repo}/issues
-    Then la respuesta debe tener status 200
-    And la respuesta debe ser una lista
-
-  @regression
-  Scenario: Crear issue en un repositorio
-    Given que existe un repositorio válido
-    When creo un issue con título y descripción
-    Then la respuesta debe tener status 201
-    And debe devolver un número de issue
-    And el título debe coincidir con el enviado
-```
-
----
-
-## Instalación
-
-Instalar dependencias:
+## Comandos de instalación
 
 ```bash
 npm install
 ```
-
-Instalar navegadores de Playwright, si aplica:
 
 ```bash
 npx playwright install
@@ -291,7 +321,7 @@ npx playwright install
 
 ---
 
-## Ejecución
+## Comandos de ejecución
 
 Correr toda la suite:
 
@@ -305,22 +335,22 @@ Correr solo smoke:
 npx playwright test --grep @smoke
 ```
 
+Correr solo e2e:
+
+```bash
+npx playwright test --grep @e2e
+```
+
 Correr solo regression:
 
 ```bash
 npx playwright test --grep @regression
 ```
 
-Correr un archivo específico:
+Correr archivo específico:
 
 ```bash
 npx playwright test tests/repos.spec.js
-```
-
-Correr en staging:
-
-```bash
-ENV=staging npx playwright test
 ```
 
 Ver reporte HTML:
@@ -331,32 +361,40 @@ npx playwright show-report
 
 ---
 
-## .gitignore
-
-El archivo `.gitignore` incluye:
-
-```gitignore
-node_modules/
-playwright-report/
-test-results/
-.env
-.env.dev
-.env.local
-.DS_Store
-```
-
----
-
 ## Bugs encontrados
 
 No se encontraron bugs funcionales durante la ejecución.
 
-Si algún test falla, se debe revisar primero:
+Los errores obtenidos en pruebas negativas corresponden al comportamiento esperado de la API:
 
-- Que el token sea válido.
-- Que el token tenga permisos `repo` y `user`.
-- Que `.env.dev` esté configurado correctamente.
-- Que `GITHUB_USERNAME` coincida con el usuario dueño del token.
+- Usuario inexistente retorna 404.
+- Repositorio inexistente retorna 404.
+- Repositorio con nombre inválido retorna 422.
+- Crear repositorio sin token retorna 401.
+- Crear issue sin token retorna 401.
+
+Si en una ejecución futura algún endpoint responde diferente a lo documentado, se debe registrar en esta sección con:
+
+- Endpoint afectado.
+- Resultado esperado.
+- Resultado actual.
+- Evidencia.
+
+---
+
+## Escenarios no implementados
+
+Se dejó documentado un escenario con `test.fixme`:
+
+```text
+CP07 - Eliminar repositorio creado
+```
+
+Motivo:
+
+```text
+DELETE de repositorio es una operación destructiva. No se implementó para evitar borrar información por error durante la práctica.
+```
 
 ---
 
@@ -364,9 +402,10 @@ Si algún test falla, se debe revisar primero:
 
 - El token de GitHub no debe subirse al repositorio.
 - `.env.dev` debe estar en `.gitignore`.
-- Los repositorios se crean con nombres dinámicos para evitar duplicados.
-- Las operaciones de creación y actualización requieren un token válido.
-- Los tests de repositorios e issues usan `test.describe.serial` porque dependen de datos creados previamente.
+- Los tests de Playwright generan nombres de repositorios dinámicos.
+- En Postman, `repoName` se actualiza manualmente antes de ejecutar la colección.
+- Las operaciones de creación y actualización requieren un token válido con permisos suficientes.
+- Las pruebas negativas validan errores esperados de la API.
 
 ---
 
@@ -380,9 +419,10 @@ Se aplicaron conceptos de Stage 3 como:
 - Modelos para request body.
 - Variables de entorno.
 - Autenticación con token.
-- Tags `@smoke` y `@regression`.
-- Validaciones profesionales con `expect`.
+- Tags `@smoke`, `@e2e` y `@regression`.
+- Validaciones con `expect`.
+- Pruebas positivas y negativas.
 - Documentación en README.
 - Colección de Postman.
 
-El objetivo principal fue validar flujos reales de GitHub API manteniendo el token seguro y el código organizado.
+El objetivo fue validar flujos reales de GitHub API manteniendo el token seguro y el código organizado.
